@@ -1,6 +1,8 @@
 package fr.esgi.avis.domain.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,7 @@ import lombok.Setter;
 public class Joueur extends Utilisateur {
     private LocalDate dateDeNaissance;
     private Avatar avatar;
+    private List<Avis> avis = new ArrayList<>();
 
     public Joueur(
             Long id,
@@ -38,4 +41,5 @@ public class Joueur extends Utilisateur {
         return false;
     }
 }
+
 

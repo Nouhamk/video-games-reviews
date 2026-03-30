@@ -51,17 +51,20 @@ public class JoueurJpaAdapter implements JoueurRepositoryPort {
         if (joueur == null) {
             return null;
         }
-        AvatarJpaEntity avatar = joueur.getAvatar() == null
-                ? null
-                : new AvatarJpaEntity(joueur.getAvatar().getId(), joueur.getAvatar().getNom());
-        return new JoueurJpaEntity(
-                joueur.getId(),
-                joueur.getPseudo(),
-                joueur.getEmail(),
-                joueur.getMotDePasse(),
-                joueur.getDateDeNaissance(),
-                avatar
-        );
+        AvatarJpaEntity avatar = null;
+        if (joueur.getAvatar() != null) {
+            avatar = new AvatarJpaEntity();
+            avatar.setId(joueur.getAvatar().getId());
+            avatar.setNom(joueur.getAvatar().getNom());
+        }
+        JoueurJpaEntity entity = new JoueurJpaEntity();
+        entity.setId(joueur.getId());
+        entity.setPseudo(joueur.getPseudo());
+        entity.setEmail(joueur.getEmail());
+        entity.setMotDePasse(joueur.getMotDePasse());
+        entity.setDateDeNaissance(joueur.getDateDeNaissance());
+        entity.setAvatar(avatar);
+        return entity;
     }
 }
 

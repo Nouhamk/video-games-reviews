@@ -11,7 +11,6 @@ import fr.esgi.avis.domain.model.Genre;
 import fr.esgi.avis.domain.model.Jeu;
 import fr.esgi.avis.domain.model.Plateforme;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 // [rôle de la classe] Mapper manuel entre le domaine Jeu et son entite JPA.
@@ -21,10 +20,7 @@ public final class JeuPersistenceMapper {
     }
 
     public static Jeu toDomain(JeuJpaEntity e) {
-        if (e == null) {
-            return null;
-        }
-
+        if (e == null) return null;
         Jeu jeu = new Jeu();
         jeu.setId(e.getId());
         jeu.setNom(e.getNom());
@@ -44,10 +40,7 @@ public final class JeuPersistenceMapper {
     }
 
     public static JeuJpaEntity toEntity(Jeu j) {
-        if (j == null) {
-            return null;
-        }
-
+        if (j == null) return null;
         JeuJpaEntity entity = new JeuJpaEntity();
         entity.setId(j.getId());
         entity.setNom(j.getNom());
@@ -66,40 +59,55 @@ public final class JeuPersistenceMapper {
         return entity;
     }
 
-    private static Genre toDomainGenre(GenreJpaEntity entity) {
-        return entity == null ? null : Genre.builder().id(entity.getId()).nom(entity.getNom()).build();
+    private static Genre toDomainGenre(GenreJpaEntity e) {
+        return e == null ? null : Genre.builder().id(e.getId()).nom(e.getNom()).build();
     }
 
-    private static GenreJpaEntity toEntityGenre(Genre domain) {
-        return domain == null ? null : new GenreJpaEntity(domain.getId(), domain.getNom());
+    private static GenreJpaEntity toEntityGenre(Genre d) {
+        if (d == null) return null;
+        GenreJpaEntity e = new GenreJpaEntity();
+        e.setId(d.getId());
+        e.setNom(d.getNom());
+        return e;
     }
 
-    private static Editeur toDomainEditeur(EditeurJpaEntity entity) {
-        return entity == null ? null : Editeur.builder().id(entity.getId()).nom(entity.getNom()).build();
+    private static Editeur toDomainEditeur(EditeurJpaEntity e) {
+        return e == null ? null : Editeur.builder().id(e.getId()).nom(e.getNom()).build();
     }
 
-    private static EditeurJpaEntity toEntityEditeur(Editeur domain) {
-        return domain == null ? null : new EditeurJpaEntity(domain.getId(), domain.getNom());
+    private static EditeurJpaEntity toEntityEditeur(Editeur d) {
+        if (d == null) return null;
+        EditeurJpaEntity e = new EditeurJpaEntity();
+        e.setId(d.getId());
+        e.setNom(d.getNom());
+        return e;
     }
 
-    private static Classification toDomainClassification(ClassificationJpaEntity entity) {
-        return entity == null
-                ? null
-                : Classification.builder().id(entity.getId()).nom(entity.getNom()).couleurRGB(entity.getCouleurRGB()).build();
+    private static Classification toDomainClassification(ClassificationJpaEntity e) {
+        return e == null ? null
+                : Classification.builder().id(e.getId()).nom(e.getNom()).couleurRGB(e.getCouleurRGB()).build();
     }
 
-    private static ClassificationJpaEntity toEntityClassification(Classification domain) {
-        return domain == null ? null : new ClassificationJpaEntity(domain.getId(), domain.getNom(), domain.getCouleurRGB());
+    private static ClassificationJpaEntity toEntityClassification(Classification d) {
+        if (d == null) return null;
+        ClassificationJpaEntity e = new ClassificationJpaEntity();
+        e.setId(d.getId());
+        e.setNom(d.getNom());
+        e.setCouleurRGB(d.getCouleurRGB());
+        return e;
     }
 
-    private static Plateforme toDomainPlateforme(PlateformeJpaEntity entity) {
-        return entity == null
-                ? null
-                : Plateforme.builder().id(entity.getId()).nom(entity.getNom()).dateDeSortie(entity.getDateDeSortie()).build();
+    private static Plateforme toDomainPlateforme(PlateformeJpaEntity e) {
+        return e == null ? null
+                : Plateforme.builder().id(e.getId()).nom(e.getNom()).dateDeSortie(e.getDateDeSortie()).build();
     }
 
-    private static PlateformeJpaEntity toEntityPlateforme(Plateforme domain) {
-        return domain == null ? null : new PlateformeJpaEntity(domain.getId(), domain.getNom(), domain.getDateDeSortie());
+    private static PlateformeJpaEntity toEntityPlateforme(Plateforme d) {
+        if (d == null) return null;
+        PlateformeJpaEntity e = new PlateformeJpaEntity();
+        e.setId(d.getId());
+        e.setNom(d.getNom());
+        e.setDateDeSortie(d.getDateDeSortie());
+        return e;
     }
 }
-

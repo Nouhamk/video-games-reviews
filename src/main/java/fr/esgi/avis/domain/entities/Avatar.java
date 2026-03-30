@@ -1,5 +1,4 @@
-package fr.esgi.avis.Business;
-
+package fr.esgi.avis.domain.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,8 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Genre {
+public class Avatar {
 
-    private Long id;
-    private String nom;
+	private Long id;
+	private String nom;
+	private Joueur joueur;
 }
+

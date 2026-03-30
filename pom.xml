@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>25</java.version>
+		<lombok.version>1.18.38</lombok.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -52,7 +53,28 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.12.7</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.12.7</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.12.7</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
@@ -74,6 +96,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -98,6 +121,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
@@ -109,14 +137,38 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
+									<excludes>
+										<exclude>fr/esgi/avis/domain/entities/**</exclude>
+										<exclude>fr/esgi/avis/application/usecases/**</exclude>
+										<exclude>fr/esgi/avis/application/ports/out/*Gateway.java</exclude>
+										<exclude>fr/esgi/avis/application/ports/in/ConsulterAvisUseCase.java</exclude>
+										<exclude>fr/esgi/avis/application/ports/in/CreerAvisUseCase.java</exclude>
+										<exclude>fr/esgi/avis/application/ports/in/ModererAvisUseCase.java</exclude>
+										<exclude>fr/esgi/avis/adapters/out/memory/**</exclude>
+										<exclude>fr/esgi/avis/adapters/config/**</exclude>
+										<exclude>fr/esgi/avis/adapters/in/web/dto/Avis*.java</exclude>
+									</excludes>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
+										<version>${lombok.version}</version>
 						</path>
 					</annotationProcessorPaths>
+								<testExcludes>
+									<testExclude>**/domain/entities/**</testExclude>
+								</testExcludes>
 				</configuration>
 			</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-surefire-plugin</artifactId>
+							<configuration>
+								<excludes>
+									<exclude>**/domain/entities/**</exclude>
+								</excludes>
+							</configuration>
+						</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

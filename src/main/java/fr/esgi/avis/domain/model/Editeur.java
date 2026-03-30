@@ -1,19 +1,19 @@
-package fr.esgi.avis.Business;
+package fr.esgi.avis.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.time.LocalDate;
-
+// [rôle de la classe] Modele metier representant un editeur de jeux.
 @Getter
+@Setter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class Plateforme {
-
+@AllArgsConstructor
+public class Editeur {
     private Long id;
     private String nom;
-    private LocalDate dateDeSortie;
 }
+

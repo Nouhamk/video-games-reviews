@@ -6,6 +6,7 @@ import fr.esgi.avis.application.ports.out.JoueurRepositoryPort;
 import fr.esgi.avis.domain.model.Avatar;
 import fr.esgi.avis.domain.model.Joueur;
 import org.springframework.stereotype.Repository;
+import java.util.List;
 import java.util.Optional;
 @Repository
 public class JoueurJpaAdapter implements JoueurRepositoryPort {
@@ -15,6 +16,13 @@ public class JoueurJpaAdapter implements JoueurRepositoryPort {
     @Override public Optional<Joueur> findByEmail(String email) {
         return repo.findByEmail(email).map(this::toDomain);
     }
+    @Override public Optional<Joueur> findById(Long id) {
+        return repo.findById(id).map(this::toDomain);
+    }
+    @Override public List<Joueur> findAll() {
+        return repo.findAll().stream().map(this::toDomain).toList();
+    }
+    @Override public void deleteById(Long id) { repo.deleteById(id); }
     private Joueur toDomain(JoueurJpaEntity e) {
         if (e == null) return null;
         Avatar avatar = e.getAvatar() == null ? null :

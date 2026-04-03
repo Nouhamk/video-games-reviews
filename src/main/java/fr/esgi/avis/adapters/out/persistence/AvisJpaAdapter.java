@@ -19,4 +19,5 @@ public class AvisJpaAdapter implements AvisRepositoryPort {
     @Override public List<Avis> findByJeuId(Long jeuId) {
         return repo.findByJeuId(jeuId).stream().map(AvisPersistenceMapper::toDomain).toList();
     }
+    @Override public void deleteById(Long id) { repo.deleteById(id); }
 }

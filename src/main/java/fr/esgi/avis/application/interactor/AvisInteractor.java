@@ -3,6 +3,7 @@ package fr.esgi.avis.application.interactor;
 import fr.esgi.avis.application.ports.in.AvisUseCase;
 import fr.esgi.avis.application.ports.out.AvisRepositoryPort;
 import fr.esgi.avis.application.ports.out.JeuRepositoryPort;
+import fr.esgi.avis.domain.exception.AccesInterditException;
 import fr.esgi.avis.domain.exception.AvisInvalideException;
 import fr.esgi.avis.domain.exception.JeuNotFoundException;
 import fr.esgi.avis.domain.model.Avis;
@@ -40,11 +41,15 @@ public class AvisInteractor implements AvisUseCase {
     }
 
     @Override
-    public Avis moderer(Long avisId, boolean approuver, String raisonRejet) {
-        Avis avis = avisRepository.findById(avisId)
+    public Avis trouverParId(Long avisId) {
+        return avisRepository.findById(avisId)
                 .orElseThrow(() -> new AvisInvalideException(
                         "Avis introuvable avec l'id : " + avisId));
+    }
 
+    @Override
+    public Avis moderer(Long avisId, boolean approuver, String raisonRejet) {
+        Avis avis = trouverParId(avisId);
         if (avis.getStatut() == StatutAvis.EN_ATTENTE) {
             avis.prendreEnCharge();
         }
@@ -55,5 +60,16 @@ public class AvisInteractor implements AvisUseCase {
                     ? raisonRejet : "Non conforme à la charte.");
         }
         return avisRepository.save(avis);
+    }
+
+    @Override
+    public void supprimer(Long avisId, Long joueurId) {
+        Avis avis = trouverParId(avisId);
+        if (joueurId != null && (avis.getJoueur() == null
+                || !joueurId.equals(avis.getJoueur().getId()))) {
+            throw new AccesInterditException("Vous ne pouvez pas supprimer cet avis.");
+        }
+        avis.supprimer();
+        avisRepository.save(avis);
     }
 }

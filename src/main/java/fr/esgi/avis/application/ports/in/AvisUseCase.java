@@ -10,6 +10,9 @@ public interface AvisUseCase {
 
     List<Avis> listerParJeu(Long jeuId);
 
-    Avis moderer(Long avisId, boolean approuver, String raisonRejet);
-}
+    Avis trouverParId(Long avisId);
 
+    Avis moderer(Long avisId, boolean approuver, String raisonRejet);
+
+    void supprimer(Long avisId, Long joueurId);
+}

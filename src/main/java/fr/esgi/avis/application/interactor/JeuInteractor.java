@@ -30,4 +30,17 @@ public class JeuInteractor implements JeuUseCase {
         return jeuRepository.findById(id)
                 .orElseThrow(() -> new JeuNotFoundException("Jeu introuvable avec l'id : " + id));
     }
+
+    @Override
+    public Jeu modifier(Long id, Jeu jeu) {
+        trouverParId(id); // vérifie existence
+        jeu.setId(id);
+        return jeuRepository.save(jeu);
+    }
+
+    @Override
+    public void supprimer(Long id) {
+        trouverParId(id); // vérifie existence
+        jeuRepository.deleteById(id);
+    }
 }

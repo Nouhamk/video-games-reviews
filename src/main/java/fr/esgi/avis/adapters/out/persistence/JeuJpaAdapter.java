@@ -19,4 +19,5 @@ public class JeuJpaAdapter implements JeuRepositoryPort {
     @Override public List<Jeu> findAll() {
         return repo.findAll().stream().map(JeuPersistenceMapper::toDomain).toList();
     }
+    @Override public void deleteById(Long id) { repo.deleteById(id); }
 }

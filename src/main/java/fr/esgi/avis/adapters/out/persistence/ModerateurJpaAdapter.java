@@ -4,6 +4,7 @@ import fr.esgi.avis.adapters.out.persistence.repository.ModerateurSpringDataRepo
 import fr.esgi.avis.application.ports.out.ModerateurRepositoryPort;
 import fr.esgi.avis.domain.model.Moderateur;
 import org.springframework.stereotype.Repository;
+import java.util.List;
 import java.util.Optional;
 @Repository
 public class ModerateurJpaAdapter implements ModerateurRepositoryPort {
@@ -12,6 +13,12 @@ public class ModerateurJpaAdapter implements ModerateurRepositoryPort {
     @Override public Moderateur save(Moderateur m) { return toDomain(repo.save(toEntity(m))); }
     @Override public Optional<Moderateur> findByEmail(String email) {
         return repo.findByEmail(email).map(this::toDomain);
+    }
+    @Override public Optional<Moderateur> findById(Long id) {
+        return repo.findById(id).map(this::toDomain);
+    }
+    @Override public List<Moderateur> findAll() {
+        return repo.findAll().stream().map(this::toDomain).toList();
     }
     private Moderateur toDomain(ModerateurJpaEntity e) {
         if (e == null) return null;

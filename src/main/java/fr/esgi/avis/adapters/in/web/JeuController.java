@@ -43,4 +43,26 @@ public class JeuController {
     public JeuResponse ajouter(@Valid @RequestBody AjouterJeuRequest request) {
         return JeuWebMapper.toResponse(jeuUseCase.ajouter(JeuWebMapper.toDomain(request)));
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MODERATEUR')")
+    public JeuResponse modifier(@PathVariable Long id,
+                                @Valid @RequestBody AjouterJeuRequest request) {
+        try {
+            return JeuWebMapper.toResponse(jeuUseCase.modifier(id, JeuWebMapper.toDomain(request)));
+        } catch (JeuNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('MODERATEUR')")
+    public void supprimer(@PathVariable Long id) {
+        try {
+            jeuUseCase.supprimer(id);
+        } catch (JeuNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
 }

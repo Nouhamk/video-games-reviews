@@ -11,5 +11,8 @@ public interface JeuUseCase {
     List<Jeu> listerTous();
 
     Jeu trouverParId(Long id);
-}
 
+    Jeu modifier(Long id, Jeu jeu);
+
+    void supprimer(Long id);
+}

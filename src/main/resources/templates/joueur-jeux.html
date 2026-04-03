@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout-joueur :: layout('Catalogue', ~{::main})}">
+<body><main>
+<section class="hero">
+  <div class="container">
+    <div class="hero__label">Catalogue collaboratif</div>
+    <h1 class="hero__title">Découvrez et notez<br/><em>vos jeux préférés</em></h1>
+    <p class="hero__sub">Lisez des avis vérifiés, partagez votre expérience, et aidez la communauté à choisir.</p>
+    <div class="hero__stats">
+      <div>
+        <div class="hero__stat-value" th:text="${jeux.size()}">0</div>
+        <div class="hero__stat-label">Jeux</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container">
+    <div class="section__header">
+      <h2 class="section__title">Tous les jeux</h2>
+      <span class="section__count" th:text="${jeux.size()} + ' jeu(s)'"></span>
+    </div>
+    <div class="games-grid">
+      <div th:if="${jeux.isEmpty()}" class="empty-state" style="grid-column:1/-1">
+        <div class="empty-state__icon">🎮</div>
+        <div class="empty-state__text">Aucun jeu disponible pour le moment.</div>
+      </div>
+      <a th:each="j : ${jeux}" class="game-card fade-up"
+         th:href="@{/joueur/jeux/{id}(id=${j.id})}" style="text-decoration:none">
+        <div class="game-card__cover">
+          <span th:if="${j.genre != null}" class="game-card__genre-tag" th:text="${j.genre.nom}">Genre</span>
+          🎮
+        </div>
+        <div class="game-card__body">
+          <div class="game-card__title" th:text="${j.nom}">Nom</div>
+          <div class="game-card__meta" th:text="${j.editeur?.nom} + ' · ' + ${j.dateSortie}">Éditeur · Date</div>
+          <div class="game-card__footer">
+            <span class="game-card__price" th:text="${j.prix} + ' €'">0 €</span>
+            <span class="btn-sm btn-accent">Voir les avis</span>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+</main></body></html>

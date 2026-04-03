@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout-joueur :: layout(${jeu.nom}, ~{::main})}">
+<body><main>
+<div class="container">
+  <div class="breadcrumb">
+    <a th:href="@{/joueur/jeux}">Jeux</a>
+    <span class="breadcrumb__sep">›</span>
+    <span th:text="${jeu.nom}">Jeu</span>
+  </div>
+  <div class="detail-layout">
+    <!-- Colonne principale -->
+    <div>
+      <div class="jeu-cover-placeholder">🎮</div>
+      <h1 class="jeu-title" th:text="${jeu.nom}">Titre</h1>
+      <div class="jeu-meta-row">
+        <span class="tag tag--accent" th:if="${jeu.genre != null}"          th:text="${jeu.genre.nom}">Genre</span>
+        <span class="tag"             th:if="${jeu.editeur != null}"         th:text="${jeu.editeur.nom}">Éditeur</span>
+        <span class="tag"             th:if="${jeu.classification != null}"  th:text="${jeu.classification.nom}">PEGI</span>
+        <span class="tag"             th:if="${jeu.dateSortie != null}"      th:text="${jeu.dateSortie}">Date</span>
+      </div>
+      <p class="jeu-description" th:text="${jeu.description}">Description</p>
+
+      <!-- Avis approuvés -->
+      <div class="section__header" style="margin-top:2rem">
+        <h2 class="section__title">Avis des joueurs</h2>
+        <span class="section__count" th:text="${avis.size()} + ' avis approuvé(s)'"></span>
+      </div>
+      <div class="avis-list">
+        <div th:if="${avis.isEmpty()}" class="empty-state">
+          <div class="empty-state__icon">💬</div>
+          <div class="empty-state__text">Aucun avis approuvé pour ce jeu.</div>
+        </div>
+        <div class="avis-card" th:each="a : ${avis}">
+          <div class="avis-card__header">
+            <span class="avis-card__author" th:text="${a.joueur?.pseudo}">Joueur</span>
+            <span class="avis-card__note" th:text="${a.note}">0<span>/10</span></span>
+          </div>
+          <p class="avis-card__text" th:text="${a.description}">Texte</p>
+          <div class="avis-card__date" th:text="${#temporals.format(a.dateDEnvoi,'dd/MM/yyyy')}">Date</div>
+          <!-- Supprimer uniquement si c'est son propre avis -->
+          <form th:if="${a.joueur?.id == joueurConnecte?.id}"
+                th:action="@{/joueur/avis/{id}/supprimer(id=${a.id})}" method="post" style="margin-top:.6rem">
+            <button type="submit" class="btn-sm btn-danger"
+                    onclick="return confirm('Supprimer cet avis ?')">Supprimer mon avis</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Formulaire rédiger un avis -->
+      <div class="avis-form-box">
+        <div class="form-title">Rédiger un avis</div>
+        <form th:action="@{/joueur/jeux/{id}/avis(id=${jeu.id})}" method="post" th:object="${avisForm}">
+          <div class="form-group">
+            <label class="form-label">Votre avis</label>
+            <textarea class="form-control" th:field="*{description}" rows="4"
+                      placeholder="Partagez votre expérience avec ce jeu..."></textarea>
+            <div th:if="${#fields.hasErrors('description')}" class="form-error" th:errors="*{description}"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Note : <span id="noteVal">5.0</span> / 10</label>
+            <div class="note-display" id="noteDisplay">5.0</div>
+            <input type="range" th:field="*{note}" min="0" max="10" step="0.5" value="5"
+                   oninput="document.getElementById('noteVal').textContent=this.value;document.getElementById('noteDisplay').textContent=this.value"/>
+            <div th:if="${#fields.hasErrors('note')}" class="form-error" th:errors="*{note}"></div>
+          </div>
+          <button type="submit" class="btn-full">Publier l'avis →</button>
+          <p style="font-size:.78rem;color:var(--text3);text-align:center;margin-top:.75rem">
+            Visible après modération par l'équipe.
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Colonne score -->
+    <div>
+      <div class="score-widget">
+        <div class="score-number" th:text="${moyenneNote}">0.0</div>
+        <div class="score-label">Note moyenne</div>
+        <div class="score-count" th:text="${nombreAvis} + ' avis'"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</main></body></html>

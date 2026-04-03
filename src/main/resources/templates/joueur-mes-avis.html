@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout-joueur :: layout('Mes avis', ~{::main})}">
+<body><main>
+<section class="section">
+  <div class="container">
+    <div class="section__header">
+      <h2 class="section__title">Mes avis</h2>
+      <span class="section__count" th:text="${mesAvis.size()} + ' avis soumis'"></span>
+    </div>
+    <div class="avis-list">
+      <div th:if="${mesAvis.isEmpty()}" class="empty-state">
+        <div class="empty-state__icon">📝</div>
+        <div class="empty-state__text">Vous n'avez pas encore rédigé d'avis.<br/>
+          <a th:href="@{/joueur/jeux}" style="color:var(--accent)">Parcourir les jeux →</a>
+        </div>
+      </div>
+      <div class="avis-card" th:each="a : ${mesAvis}">
+        <div class="avis-card__header">
+          <span class="avis-card__author" th:text="${a.jeu?.nom}">Jeu</span>
+          <span class="avis-card__note" th:text="${a.note}">0<span>/10</span></span>
+        </div>
+        <p class="avis-card__text" th:text="${a.description}">Texte</p>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-top:.5rem">
+          <span class="status-pill"
+            th:classappend="${a.statut.name() == 'APPROUVE'}    ? ' status-pill--approuve'   :
+                            (${a.statut.name() == 'EN_ATTENTE'} ? ' status-pill--attente'    :
+                            (${a.statut.name() == 'REJETE'}     ? ' status-pill--rejete'     :
+                                                                    ' status-pill--moderation'))"
+            th:text="${a.statut}">STATUT</span>
+          <form th:action="@{/joueur/avis/{id}/supprimer(id=${a.id})}" method="post">
+            <button type="submit" class="btn-sm btn-danger"
+                    onclick="return confirm('Supprimer définitivement cet avis ?')">Supprimer</button>
+          </form>
+        </div>
+        <div class="avis-card__date" th:text="${#temporals.format(a.dateDEnvoi,'dd/MM/yyyy')}">Date</div>
+      </div>
+    </div>
+  </div>
+</section>
+</main></body></html>

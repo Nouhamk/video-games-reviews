@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title th:text="${title} + ' — PixelAvis'">PixelAvis</title>
+<link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<nav class="navbar">
+  <div class="container navbar__inner">
+    <a th:href="@{/joueur/jeux}" class="navbar__logo">Pixel<span>Avis</span></a>
+    <div class="navbar__links">
+      <a th:href="@{/joueur/jeux}">Jeux</a>
+      <a th:href="@{/joueur/mes-avis}">Mes avis</a>
+    </div>
+    <div class="navbar__links">
+      <span style="font-size:.82rem;color:var(--text2)">
+        Bonjour, <strong th:text="${joueurConnecte?.pseudo ?: 'Joueur'}" style="color:var(--accent)">Joueur</strong>
+      </span>
+      <a th:href="@{/deconnexion}" style="font-size:.82rem;color:var(--text3)">Déconnexion</a>
+    </div>
+  </div>
+</nav>
+<div class="container" style="padding-top:1.5rem">
+  <div th:if="${succes}" class="flash flash--success" th:text="${succes}"></div>
+  <div th:if="${erreur}"  class="flash flash--error"  th:text="${erreur}"></div>
+</div>
+<th:block th:replace="${content}"/>
+<footer><div class="container">PixelAvis · Projet ESGI M2 · Clean Architecture</div></footer>
+</body>
+</html>

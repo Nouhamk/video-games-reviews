@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout-moderateur :: layout('Tableau de bord', ~{::main})}">
+<body><main>
+<section class="section">
+  <div class="container">
+    <div class="section__header">
+      <h2 class="section__title">Tableau de bord</h2>
+    </div>
+
+    <!-- Stats -->
+    <div class="mod-stats">
+      <div class="mod-stat-card">
+        <div class="mod-stat-card__value color-warning" th:text="${nbEnAttente}">0</div>
+        <div class="mod-stat-card__label">En attente</div>
+      </div>
+      <div class="mod-stat-card">
+        <div class="mod-stat-card__value color-accent2" th:text="${nbEnModeration}">0</div>
+        <div class="mod-stat-card__label">En modération</div>
+      </div>
+      <div class="mod-stat-card">
+        <div class="mod-stat-card__value color-success" th:text="${nbApprouves}">0</div>
+        <div class="mod-stat-card__label">Approuvés</div>
+      </div>
+      <div class="mod-stat-card">
+        <div class="mod-stat-card__value color-danger" th:text="${nbRejetes}">0</div>
+        <div class="mod-stat-card__label">Rejetés</div>
+      </div>
+    </div>
+
+    <!-- Avis à traiter -->
+    <div class="mod-section">
+      <div class="mod-section__title">Avis en attente</div>
+      <table class="mod-table">
+        <thead>
+          <tr>
+            <th>Jeu</th><th>Joueur</th><th>Note</th><th>Extrait</th><th>Date</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:if="${enAttente.isEmpty()}">
+            <td colspan="6" class="empty-state" style="padding:1.5rem;text-align:center;color:var(--text3)">
+              Aucun avis en attente.
+            </td>
+          </tr>
+          <tr th:each="a : ${enAttente}">
+            <td th:text="${a.jeu?.nom}">Jeu</td>
+            <td th:text="${a.joueur?.pseudo}">Joueur</td>
+            <td><span class="note-pill" th:text="${a.note} + '/10'">0</span></td>
+            <td th:text="${#strings.abbreviate(a.description, 55)}">...</td>
+            <td th:text="${#temporals.format(a.dateDEnvoi,'dd/MM/yy')}">Date</td>
+            <td>
+              <div class="mod-table__actions">
+                <form th:action="@{/moderateur/avis/{id}/approuver(id=${a.id})}" method="post">
+                  <button type="submit" class="btn-sm btn-success">Approuver</button>
+                </form>
+                <form th:action="@{/moderateur/avis/{id}/rejeter(id=${a.id})}" method="post">
+                  <button type="submit" class="btn-sm btn-danger">Rejeter</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tous les avis -->
+    <div class="mod-section">
+      <div class="mod-section__title">Tous les avis</div>
+      <table class="mod-table">
+        <thead>
+          <tr><th>Jeu</th><th>Joueur</th><th>Note</th><th>Avis</th><th>Statut</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="a : ${tousLesAvis}">
+            <td th:text="${a.jeu?.nom}">Jeu</td>
+            <td th:text="${a.joueur?.pseudo}">Joueur</td>
+            <td><span class="note-pill" th:text="${a.note} + '/10'">0</span></td>
+            <td th:text="${#strings.abbreviate(a.description, 60)}">...</td>
+            <td>
+              <span class="status-pill"
+                th:classappend="${a.statut.name() == 'APPROUVE'}      ? ' status-pill--approuve'   :
+                                (${a.statut.name() == 'EN_ATTENTE'}   ? ' status-pill--attente'    :
+                                (${a.statut.name() == 'REJETE'}       ? ' status-pill--rejete'     :
+                                                                          ' status-pill--moderation'))"
+                th:text="${a.statut}">STATUT</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+</main></body></html>

@@ -40,12 +40,22 @@ public class SecurityConfig {
                 .sessionManagement(s -> s
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        // UI Thymeleaf — tout accès libre (pas d'auth dans ce projet)
+                        // UI Thymeleaf
                         .requestMatchers("/", "/jeux/**", "/moderateur/**").permitAll()
                         // Statiques
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                        // Dev tools
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico").permitAll()
+                        // H2 console
                         .requestMatchers("/h2-console/**").permitAll()
+                        // Swagger / OpenAPI
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml",
+                                "/swagger-resources/**",
+                                "/configuration/**"
+                        ).permitAll()
                         // API lecture publique
                         .requestMatchers(HttpMethod.GET,  "/api/jeux/**", "/api/avis/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()

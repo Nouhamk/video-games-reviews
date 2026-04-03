@@ -1,18 +1,19 @@
 package fr.esgi.avis.infrastructure.config;
 
-import fr.esgi.avis.application.interactor.AvisInteractor;
 import fr.esgi.avis.application.interactor.AuthInteractor;
+import fr.esgi.avis.application.interactor.AvisInteractor;
 import fr.esgi.avis.application.interactor.JeuInteractor;
-import fr.esgi.avis.application.ports.in.AvisUseCase;
 import fr.esgi.avis.application.ports.in.AuthUseCase;
+import fr.esgi.avis.application.ports.in.AvisUseCase;
 import fr.esgi.avis.application.ports.in.JeuUseCase;
 import fr.esgi.avis.application.ports.out.AvisRepositoryPort;
 import fr.esgi.avis.application.ports.out.JeuRepositoryPort;
 import fr.esgi.avis.application.ports.out.JoueurRepositoryPort;
+import fr.esgi.avis.application.ports.out.ModerateurRepositoryPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-// [rôle de la classe] Configuration de cablage manuel des interactors applicatifs.
 @Configuration
 public class BeanConfig {
 
@@ -22,13 +23,17 @@ public class BeanConfig {
     }
 
     @Bean
-    public AvisUseCase avisUseCase(AvisRepositoryPort avisRepositoryPort, JeuRepositoryPort jeuRepositoryPort) {
+    public AvisUseCase avisUseCase(AvisRepositoryPort avisRepositoryPort,
+                                    JeuRepositoryPort jeuRepositoryPort) {
         return new AvisInteractor(avisRepositoryPort, jeuRepositoryPort);
     }
 
     @Bean
-    public AuthUseCase authUseCase(JoueurRepositoryPort joueurRepositoryPort, JwtTokenProvider jwtTokenProvider) {
-        return new AuthInteractor(joueurRepositoryPort, jwtTokenProvider);
+    public AuthUseCase authUseCase(JoueurRepositoryPort joueurRepositoryPort,
+                                    ModerateurRepositoryPort moderateurRepositoryPort,
+                                    PasswordEncoder passwordEncoder,
+                                    JwtTokenProvider jwtTokenProvider) {
+        return new AuthInteractor(joueurRepositoryPort, moderateurRepositoryPort,
+                passwordEncoder, jwtTokenProvider);
     }
 }
-

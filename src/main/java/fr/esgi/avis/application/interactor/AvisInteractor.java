@@ -7,57 +7,53 @@ import fr.esgi.avis.domain.exception.AvisInvalideException;
 import fr.esgi.avis.domain.exception.JeuNotFoundException;
 import fr.esgi.avis.domain.model.Avis;
 import fr.esgi.avis.domain.model.StatutAvis;
-import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
-// [rôle de la classe] Interactor applicatif des cas d'usage de redaction et moderation des avis.
+import java.util.List;
+
 public class AvisInteractor implements AvisUseCase {
 
     private final AvisRepositoryPort avisRepository;
-    private final JeuRepositoryPort jeuRepository;
+    private final JeuRepositoryPort  jeuRepository;
 
     public AvisInteractor(AvisRepositoryPort avisRepository, JeuRepositoryPort jeuRepository) {
         this.avisRepository = avisRepository;
-        this.jeuRepository = jeuRepository;
+        this.jeuRepository  = jeuRepository;
     }
 
     @Override
-    @Transactional
     public Avis rediger(Avis avis) {
-        if (avis == null || avis.getJeu() == null || avis.getJeu().getId() == null) {
+        if (avis.getJoueur() == null || avis.getJoueur().getId() == null) {
+            throw new AvisInvalideException("Un avis doit être associé à un joueur.");
+        }
+        if (avis.getJeu() == null || avis.getJeu().getId() == null) {
             throw new AvisInvalideException("Un avis doit cibler un jeu existant.");
         }
-        if (avis.getJoueur() == null || avis.getJoueur().getId() == null) {
-            throw new AvisInvalideException("Un avis doit etre associe a un joueur authentifie.");
-        }
-        Long jeuId = avis.getJeu().getId();
-        jeuRepository.findById(jeuId)
-                .orElseThrow(() -> new JeuNotFoundException("Jeu introuvable avec l'id: " + jeuId));
+        jeuRepository.findById(avis.getJeu().getId())
+                .orElseThrow(() -> new JeuNotFoundException(
+                        "Jeu introuvable avec l'id : " + avis.getJeu().getId()));
         return avisRepository.save(avis);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Avis> listerParJeu(Long jeuId) {
         return avisRepository.findByJeuId(jeuId);
     }
 
     @Override
-    @Transactional
     public Avis moderer(Long avisId, boolean approuver, String raisonRejet) {
         Avis avis = avisRepository.findById(avisId)
-                .orElseThrow(() -> new AvisInvalideException("Avis introuvable avec l'id: " + avisId));
+                .orElseThrow(() -> new AvisInvalideException(
+                        "Avis introuvable avec l'id : " + avisId));
 
-        if (avis.getStatut() == null || avis.getStatut() == StatutAvis.EN_ATTENTE) {
+        if (avis.getStatut() == StatutAvis.EN_ATTENTE) {
             avis.prendreEnCharge();
         }
-
         if (approuver) {
             avis.approuver();
         } else {
-            avis.rejeter(raisonRejet);
+            avis.rejeter(raisonRejet != null && !raisonRejet.isBlank()
+                    ? raisonRejet : "Non conforme à la charte.");
         }
         return avisRepository.save(avis);
     }
 }
-

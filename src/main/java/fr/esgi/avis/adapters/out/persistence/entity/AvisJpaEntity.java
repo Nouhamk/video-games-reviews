@@ -1,36 +1,29 @@
 package fr.esgi.avis.adapters.out.persistence.entity;
 
 import fr.esgi.avis.domain.model.StatutAvis;
-import java.time.LocalDateTime;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// [rôle de la classe] Entite JPA representant un avis joueur sur un jeu.
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "avis")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "avis")
 public class AvisJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
+
     private Float note;
     private LocalDateTime dateDEnvoi;
 
@@ -49,6 +42,6 @@ public class AvisJpaEntity {
     @JoinColumn(name = "moderateur_id")
     private ModerateurJpaEntity moderateur;
 
+    @Column(columnDefinition = "TEXT")
     private String raisonRejet;
 }
-

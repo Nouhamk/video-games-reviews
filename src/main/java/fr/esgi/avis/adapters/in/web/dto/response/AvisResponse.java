@@ -1,13 +1,12 @@
 package fr.esgi.avis.adapters.in.web.dto.response;
 
 import fr.esgi.avis.domain.model.StatutAvis;
-import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 
-// [rôle de la classe] DTO HTTP de sortie d'un avis.
-@Getter
-@Builder
+import java.time.LocalDateTime;
+
+@Getter @Builder
 public class AvisResponse {
     private Long id;
     private String description;
@@ -19,4 +18,3 @@ public class AvisResponse {
     private Long moderateurId;
     private String raisonRejet;
 }
-

@@ -1,28 +1,18 @@
 package fr.esgi.avis.adapters.out.persistence.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// [rôle de la classe] Entite JPA de l'editeur de jeu.
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "editeurs")
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity @Table(name = "editeurs")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class EditeurJpaEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
     private String nom;
+    @OneToMany(mappedBy = "editeur") private List<JeuJpaEntity> jeux = new ArrayList<>();
 }
-

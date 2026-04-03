@@ -1,15 +1,11 @@
 package fr.esgi.avis.domain.model;
 
+import lombok.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-// [rôle de la classe] Modele metier representant un jeu video.
 @Getter
 @Setter
 @Builder
@@ -28,4 +24,3 @@ public class Jeu {
     private List<Plateforme> plateformes = new ArrayList<>();
     private Classification classification;
 }
-

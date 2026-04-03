@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// [rôle de la classe] Classe metier abstraite commune a tous les utilisateurs.
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,7 +16,5 @@ public abstract class Utilisateur {
     private String motDePasse;
 
     public abstract boolean peutRedigerAvis();
-
     public abstract boolean peutModererAvis();
 }
-

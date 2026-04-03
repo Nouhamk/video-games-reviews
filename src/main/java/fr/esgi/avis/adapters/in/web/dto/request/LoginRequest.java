@@ -6,17 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-// [rôle de la classe] DTO HTTP de connexion.
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter @NoArgsConstructor @AllArgsConstructor
 public class LoginRequest {
-
-    @Email
-    @NotBlank
-    private String email;
-
-    @NotBlank
-    private String motDePasse;
+    @Email @NotBlank private String email;
+    @NotBlank private String motDePasse;
 }
-

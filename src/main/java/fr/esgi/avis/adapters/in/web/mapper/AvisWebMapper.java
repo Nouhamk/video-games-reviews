@@ -5,18 +5,15 @@ import fr.esgi.avis.adapters.in.web.dto.response.AvisResponse;
 import fr.esgi.avis.domain.model.Avis;
 import fr.esgi.avis.domain.model.Jeu;
 import fr.esgi.avis.domain.model.Joueur;
+
 import java.time.LocalDateTime;
 
-// [rôle de la classe] Mapper manuel entre les DTO web et le domaine Avis.
 public final class AvisWebMapper {
 
-    private AvisWebMapper() {
-    }
+    private AvisWebMapper() {}
 
     public static Avis toDomain(RedigerAvisRequest req, Long joueurId) {
-        if (req == null) {
-            return null;
-        }
+        if (req == null) return null;
         Avis avis = new Avis();
         avis.setDescription(req.getDescription());
         avis.setNote(req.getNote());
@@ -27,9 +24,7 @@ public final class AvisWebMapper {
     }
 
     public static AvisResponse toResponse(Avis avis) {
-        if (avis == null) {
-            return null;
-        }
+        if (avis == null) return null;
         return AvisResponse.builder()
                 .id(avis.getId())
                 .description(avis.getDescription())
@@ -43,4 +38,3 @@ public final class AvisWebMapper {
                 .build();
     }
 }
-

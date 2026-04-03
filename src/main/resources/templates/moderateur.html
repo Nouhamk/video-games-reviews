@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Dashboard modération', ~{::main})}">
+<body>
+<main>
+  <div class="container">
+
+    <!-- Flash -->
+    <div th:if="${succes}" class="flash flash--success" style="margin-top:1.5rem" th:text="${succes}"></div>
+    <div th:if="${erreur}"  class="flash flash--error"   style="margin-top:1.5rem" th:text="${erreur}"></div>
+
+    <!-- Hero modération -->
+    <section class="hero" style="padding:3rem 0 2rem">
+      <div class="hero__label">Espace modération</div>
+      <h1 class="hero__title" style="font-size:2rem">Dashboard <em>modérateur</em></h1>
+      <p class="hero__sub" style="font-size:.9rem">Gérez les avis soumis par la communauté.</p>
+    </section>
+
+    <!-- Stats -->
+    <div class="mod-stats">
+      <div class="mod-stat-card">
+        <div class="mod-stat-card__value color-warning" th:text="${stats.enAttente()}">0</div>
+        <div class="mod-stat-card__label">En attente</div>
+      </div>
+      <div class="mod-stat-card">
+        <div class="mod-stat-card__value color-accent2" th:text="${stats.enModeration()}">0</div>
+        <div class="mod-stat-card__label">En modération</div>
+      </div>
+      <div class="mod-stat-card">
+        <div class="mod-stat-card__value color-success" th:text="${stats.approuves()}">0</div>
+        <div class="mod-stat-card__label">Approuvés</div>
+      </div>
+      <div class="mod-stat-card">
+        <div class="mod-stat-card__value color-danger" th:text="${stats.rejetes()}">0</div>
+        <div class="mod-stat-card__label">Rejetés</div>
+      </div>
+    </div>
+
+    <!-- ── Avis EN_ATTENTE ────────────────────────────────────── -->
+    <div class="mod-section">
+      <div class="mod-section__title">⏳ En attente de modération</div>
+
+      <div th:if="${enAttente.isEmpty()}" class="empty-state" style="padding:2rem 0">
+        <div class="empty-state__icon">✅</div>
+        <div class="empty-state__text">Aucun avis en attente.</div>
+      </div>
+
+      <table class="mod-table" th:unless="${enAttente.isEmpty()}">
+        <thead>
+          <tr>
+            <th>Jeu</th>
+            <th>Joueur</th>
+            <th>Note</th>
+            <th>Extrait</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="a : ${enAttente}">
+            <td th:text="${a.jeu != null ? a.jeu.nom : '—'}">Jeu</td>
+            <td th:text="${a.joueur != null ? a.joueur.pseudo : 'Anonyme'}">Joueur</td>
+            <td><span class="note-pill" th:text="${a.note} + '/10'">8/10</span></td>
+            <td th:text="${#strings.abbreviate(a.description, 60)}">Description...</td>
+            <td th:text="${a.dateDEnvoi != null ? #temporals.format(a.dateDEnvoi,'dd/MM/yy') : '—'}">01/01/24</td>
+            <td>
+              <div class="mod-table__actions">
+                <!-- Approuver -->
+                <form th:action="@{/moderateur/approuver/{id}(id=${a.id})}" method="post" style="margin:0">
+                  <button type="submit" class="btn-sm btn-success">✓ Approuver</button>
+                </form>
+                <!-- Rejeter -->
+                <form th:action="@{/moderateur/rejeter/{id}(id=${a.id})}" method="post" style="margin:0; display:flex; gap:.4rem">
+                  <input type="text" name="raison" class="form-control"
+                         style="width:160px; padding:.3rem .6rem; font-size:.8rem"
+                         placeholder="Raison du rejet..."/>
+                  <button type="submit" class="btn-sm btn-danger">✗ Rejeter</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Avis EN_MODERATION ─────────────────────────────────── -->
+    <div class="mod-section" th:unless="${enModeration.isEmpty()}">
+      <div class="mod-section__title">🔍 En cours de modération</div>
+      <table class="mod-table">
+        <thead>
+          <tr><th>Jeu</th><th>Joueur</th><th>Note</th><th>Extrait</th><th>Statut</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="a : ${enModeration}">
+            <td th:text="${a.jeu != null ? a.jeu.nom : '—'}">Jeu</td>
+            <td th:text="${a.joueur != null ? a.joueur.pseudo : '—'}">Joueur</td>
+            <td><span class="note-pill" th:text="${a.note} + '/10'">—</span></td>
+            <td th:text="${#strings.abbreviate(a.description, 60)}">...</td>
+            <td><span class="status-pill status-pill--moderation">En modération</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Avis APPROUVÉS ─────────────────────────────────────── -->
+    <div class="mod-section" th:unless="${approuves.isEmpty()}">
+      <div class="mod-section__title">✅ Approuvés</div>
+      <table class="mod-table">
+        <thead>
+          <tr><th>Jeu</th><th>Joueur</th><th>Note</th><th>Extrait</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="a : ${approuves}">
+            <td>
+              <a th:href="@{/jeux/{id}(id=${a.jeu.id})}"
+                 style="color:var(--accent2)"
+                 th:text="${a.jeu != null ? a.jeu.nom : '—'}">Jeu</a>
+            </td>
+            <td th:text="${a.joueur != null ? a.joueur.pseudo : '—'}">Joueur</td>
+            <td><span class="note-pill" th:text="${a.note} + '/10'">—</span></td>
+            <td th:text="${#strings.abbreviate(a.description, 60)}">...</td>
+            <td th:text="${a.dateDEnvoi != null ? #temporals.format(a.dateDEnvoi,'dd/MM/yy') : '—'}">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Avis REJETÉS ───────────────────────────────────────── -->
+    <div class="mod-section" th:unless="${rejetes.isEmpty()}">
+      <div class="mod-section__title">❌ Rejetés</div>
+      <table class="mod-table">
+        <thead>
+          <tr><th>Jeu</th><th>Joueur</th><th>Note</th><th>Raison</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="a : ${rejetes}">
+            <td th:text="${a.jeu != null ? a.jeu.nom : '—'}">Jeu</td>
+            <td th:text="${a.joueur != null ? a.joueur.pseudo : '—'}">Joueur</td>
+            <td><span class="note-pill" th:text="${a.note} + '/10'">—</span></td>
+            <td style="color:var(--danger); font-size:.85rem"
+                th:text="${a.raisonRejet != null ? a.raisonRejet : '—'}">Raison</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /container -->
+</main>
+</body>
+</html>

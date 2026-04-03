@@ -1,6 +1,7 @@
 package fr.esgi.avis.adapters.in.web.ui;
 
 import fr.esgi.avis.application.ports.in.AvisUseCase;
+import fr.esgi.avis.application.ports.in.AuthUseCase;
 import fr.esgi.avis.application.ports.in.JeuUseCase;
 import fr.esgi.avis.application.ports.out.AvisRepositoryPort;
 import fr.esgi.avis.application.ports.out.ClassificationRepositoryPort;
@@ -8,7 +9,9 @@ import fr.esgi.avis.application.ports.out.EditeurRepositoryPort;
 import fr.esgi.avis.application.ports.out.GenreRepositoryPort;
 import fr.esgi.avis.application.ports.out.JoueurRepositoryPort;
 import fr.esgi.avis.application.ports.out.ModerateurRepositoryPort;
+import fr.esgi.avis.domain.exception.AccesInterditException;
 import fr.esgi.avis.domain.model.*;
+import fr.esgi.avis.infrastructure.config.JwtTokenProvider;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
@@ -17,7 +20,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -31,34 +33,37 @@ import java.util.List;
 @Controller
 public class JeuUiController {
 
-    private final JeuUseCase                jeuUseCase;
-    private final AvisUseCase               avisUseCase;
-    private final AvisRepositoryPort        avisRepository;
-    private final JoueurRepositoryPort      joueurRepository;
-    private final ModerateurRepositoryPort  moderateurRepository;
-    private final GenreRepositoryPort       genreRepository;
-    private final EditeurRepositoryPort     editeurRepository;
+    private final JeuUseCase                   jeuUseCase;
+    private final AvisUseCase                  avisUseCase;
+    private final AuthUseCase                  authUseCase;
+    private final AvisRepositoryPort           avisRepository;
+    private final JoueurRepositoryPort         joueurRepository;
+    private final ModerateurRepositoryPort     moderateurRepository;
+    private final GenreRepositoryPort          genreRepository;
+    private final EditeurRepositoryPort        editeurRepository;
     private final ClassificationRepositoryPort classificationRepository;
-    private final PasswordEncoder           passwordEncoder;
+    private final JwtTokenProvider             jwtTokenProvider;
 
     public JeuUiController(JeuUseCase jeuUseCase,
                            AvisUseCase avisUseCase,
+                           AuthUseCase authUseCase,
                            AvisRepositoryPort avisRepository,
                            JoueurRepositoryPort joueurRepository,
                            ModerateurRepositoryPort moderateurRepository,
                            GenreRepositoryPort genreRepository,
                            EditeurRepositoryPort editeurRepository,
                            ClassificationRepositoryPort classificationRepository,
-                           PasswordEncoder passwordEncoder) {
+                           JwtTokenProvider jwtTokenProvider) {
         this.jeuUseCase               = jeuUseCase;
         this.avisUseCase              = avisUseCase;
+        this.authUseCase              = authUseCase;
         this.avisRepository           = avisRepository;
         this.joueurRepository         = joueurRepository;
         this.moderateurRepository     = moderateurRepository;
         this.genreRepository          = genreRepository;
         this.editeurRepository        = editeurRepository;
         this.classificationRepository = classificationRepository;
-        this.passwordEncoder          = passwordEncoder;
+        this.jwtTokenProvider         = jwtTokenProvider;
     }
 
     // ══════════════════════════════════════════════════════════
@@ -75,39 +80,81 @@ public class JeuUiController {
         return "login";
     }
 
+    // ...existing code...
+
+    @GetMapping("/inscription")
+    public String registerPage() {
+        return "register";
+    }
+
+    @PostMapping("/inscription")
+    public String register(@RequestParam String pseudo,
+                           @RequestParam String email,
+                           @RequestParam String motDePasse,
+                           @RequestParam String confirmation,
+                           @RequestParam String dateDeNaissance,
+                           HttpSession session,
+                           RedirectAttributes ra) {
+
+        // Validation
+        if (!motDePasse.equals(confirmation)) {
+            ra.addFlashAttribute("erreurConfirmation", "Les mots de passe ne correspondent pas.");
+            ra.addFlashAttribute("erreur", "Veuillez corriger les erreurs.");
+            return "redirect:/inscription";
+        }
+        if (motDePasse.length() < 6) {
+            ra.addFlashAttribute("erreur", "Le mot de passe doit contenir au moins 6 caractères.");
+            return "redirect:/inscription";
+        }
+        if (joueurRepository.findByEmail(email).isPresent()) {
+            ra.addFlashAttribute("erreurEmail", "Cet email est déjà utilisé.");
+            ra.addFlashAttribute("erreur", "Veuillez corriger les erreurs.");
+            return "redirect:/inscription";
+        }
+
+        // Créer le joueur via le use case
+        Joueur nouveau = new Joueur(null, pseudo, email, motDePasse,
+                LocalDate.parse(dateDeNaissance), null);
+        Joueur sauvegarde = authUseCase.inscrire(nouveau);
+
+        // Connecter directement après inscription
+        session.setAttribute("joueurId",     sauvegarde.getId());
+        session.setAttribute("joueurPseudo", sauvegarde.getPseudo());
+        session.setAttribute("joueurEmail",  sauvegarde.getEmail());
+        session.setAttribute("role",         "JOUEUR");
+
+        ra.addFlashAttribute("succes", "Bienvenue " + sauvegarde.getPseudo() + " ! Votre compte a été créé.");
+        return "redirect:/joueur/jeux";
+    }
+
     @PostMapping("/connexion")
     public String login(@RequestParam String email,
                         @RequestParam String motDePasse,
                         HttpSession session,
                         RedirectAttributes ra) {
+        try {
+            // Déléguer l'auth au use case — une seule source de vérité
+            String token = authUseCase.connecter(email, motDePasse);
+            String role  = jwtTokenProvider.getRoleFromToken(token);
 
-        // Vérifier si c'est un joueur
-        var joueurOpt = joueurRepository.findByEmail(email);
-        if (joueurOpt.isPresent()) {
-            Joueur j = joueurOpt.get();
-            if (passwordEncoder.matches(motDePasse, j.getMotDePasse())) {
-                session.setAttribute("joueurId",    j.getId());
-                session.setAttribute("joueurPseudo", j.getPseudo());
-                session.setAttribute("joueurEmail",  j.getEmail());
+            if ("JOUEUR".equals(role)) {
+                var joueur = joueurRepository.findByEmail(email).orElseThrow();
+                session.setAttribute("joueurId",     joueur.getId());
+                session.setAttribute("joueurPseudo", joueur.getPseudo());
+                session.setAttribute("joueurEmail",  joueur.getEmail());
                 session.setAttribute("role",         "JOUEUR");
                 return "redirect:/joueur/jeux";
-            }
-        }
-
-        // Vérifier si c'est un modérateur
-        var modOpt = moderateurRepository.findByEmail(email);
-        if (modOpt.isPresent()) {
-            Moderateur m = modOpt.get();
-            if (passwordEncoder.matches(motDePasse, m.getMotDePasse())) {
-                session.setAttribute("modId",     m.getId());
-                session.setAttribute("modPseudo",  m.getPseudo());
-                session.setAttribute("modEmail",   m.getEmail());
-                session.setAttribute("role",       "MODERATEUR");
+            } else if ("MODERATEUR".equals(role)) {
+                var mod = moderateurRepository.findByEmail(email).orElseThrow();
+                session.setAttribute("modId",     mod.getId());
+                session.setAttribute("modPseudo", mod.getPseudo());
+                session.setAttribute("modEmail",  mod.getEmail());
+                session.setAttribute("role",      "MODERATEUR");
                 return "redirect:/moderateur/dashboard";
             }
+        } catch (AccesInterditException e) {
+            ra.addFlashAttribute("erreur", "Email ou mot de passe incorrect.");
         }
-
-        ra.addFlashAttribute("erreur", "Email ou mot de passe incorrect.");
         return "redirect:/connexion";
     }
 
@@ -331,7 +378,7 @@ public class JeuUiController {
                 (Long)   session.getAttribute("joueurId"),
                 (String) session.getAttribute("joueurPseudo"),
                 (String) session.getAttribute("joueurEmail"),
-                "", null, null
+                null, null, null
         );
     }
 
@@ -340,7 +387,7 @@ public class JeuUiController {
                 (Long)   session.getAttribute("modId"),
                 (String) session.getAttribute("modPseudo"),
                 (String) session.getAttribute("modEmail"),
-                "", ""
+                null, null
         );
     }
 

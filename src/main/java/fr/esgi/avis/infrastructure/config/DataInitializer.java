@@ -3,15 +3,39 @@ package fr.esgi.avis.infrastructure.config;
 import fr.esgi.avis.adapters.out.persistence.entity.*;
 import fr.esgi.avis.adapters.out.persistence.repository.*;
 import fr.esgi.avis.domain.model.StatutAvis;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Configuration
 public class DataInitializer {
+
+    @Value("${app.init.joueur.email}")
+    private String joueurEmail;
+
+    @Value("${app.init.joueur.pseudo}")
+    private String joueurPseudo;
+
+    @Value("${app.init.joueur.password}")
+    private String joueurPassword;
+
+    @Value("${app.init.moderateur.email}")
+    private String moderateurEmail;
+
+    @Value("${app.init.moderateur.pseudo}")
+    private String moderateurPseudo;
+
+    @Value("${app.init.moderateur.password}")
+    private String moderateurPassword;
+
+    @Value("${app.init.moderateur.telephone}")
+    private String moderateurTelephone;
 
     @Bean
     public CommandLineRunner initData(
@@ -22,7 +46,8 @@ public class DataInitializer {
             JoueurSpringDataRepository joueurRepo,
             ModerateurSpringDataRepository modRepo,
             JeuSpringDataRepository jeuRepo,
-            AvisSpringDataRepository avisRepo) {
+            AvisSpringDataRepository avisRepo,
+            PasswordEncoder passwordEncoder) {
 
         return args -> {
             if (jeuRepo.count() > 0) return;
@@ -40,15 +65,15 @@ public class DataInitializer {
             PlateformeJpaEntity ps5     = platRepo.save(new PlateformeJpaEntity(null, "PlayStation 5",   LocalDate.of(2020, 11, 12), List.of()));
             PlateformeJpaEntity switchN = platRepo.save(new PlateformeJpaEntity(null, "Nintendo Switch", LocalDate.of(2017,  3,  3), List.of()));
 
-            JoueurJpaEntity alice = joueurRepo.save(new JoueurJpaEntity(
-                    null, "Alice", "alice@example.com",
-                    "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+            JoueurJpaEntity joueur = joueurRepo.save(new JoueurJpaEntity(
+                    null, joueurPseudo, joueurEmail,
+                    passwordEncoder.encode(joueurPassword),
                     LocalDate.of(1995, 6, 15), null));
 
-            ModerateurJpaEntity bob = modRepo.save(new ModerateurJpaEntity(
-                    null, "ModBob", "bob@example.com",
-                    "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
-                    "0612345678"));
+            ModerateurJpaEntity moderateur = modRepo.save(new ModerateurJpaEntity(
+                    null, moderateurPseudo, moderateurEmail,
+                    passwordEncoder.encode(moderateurPassword),
+                    moderateurTelephone));
 
             JeuJpaEntity eldenRing = jeuRepo.save(new JeuJpaEntity(
                     null, "Elden Ring",
@@ -68,8 +93,8 @@ public class DataInitializer {
             avis1.setDateDEnvoi(LocalDateTime.of(2024, 1, 10, 14, 30));
             avis1.setStatut(StatutAvis.APPROUVE);
             avis1.setJeu(eldenRing);
-            avis1.setJoueur(alice);
-            avis1.setModerateur(bob);
+            avis1.setJoueur(joueur);
+            avis1.setModerateur(moderateur);
             avisRepo.save(avis1);
 
             AvisJpaEntity avis2 = new AvisJpaEntity();
@@ -78,7 +103,7 @@ public class DataInitializer {
             avis2.setDateDEnvoi(LocalDateTime.of(2024, 3, 5, 9, 0));
             avis2.setStatut(StatutAvis.EN_ATTENTE);
             avis2.setJeu(zelda);
-            avis2.setJoueur(alice);
+            avis2.setJoueur(joueur);
             avisRepo.save(avis2);
 
             System.out.println("✅ Données de test insérées avec succès !");

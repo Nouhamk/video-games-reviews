@@ -32,37 +32,47 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    JwtAuthFilter jwtAuthFilter) throws Exception {
         http
-                // CSRF : désactivé pour l'UI Thymeleaf et l'API REST
                 .csrf(csrf -> csrf.disable())
-                .headers(h -> h
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-                // Pas de session : stateless pour l'API, mais on garde les sessions pour Thymeleaf
-                .sessionManagement(s -> s
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        // UI Thymeleaf
-                        .requestMatchers("/", "/jeux/**", "/moderateur/**").permitAll()
-                        // Statiques
+                        // Accès public : page de connexion + statiques + swagger + h2
+                        .requestMatchers("/", "/connexion", "/inscription", "/deconnexion").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico").permitAll()
-                        // H2 console
                         .requestMatchers("/h2-console/**").permitAll()
-                        // Swagger / OpenAPI
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs",
-                                "/v3/api-docs/**",
-                                "/v3/api-docs.yaml",
-                                "/swagger-resources/**",
-                                "/configuration/**"
-                        ).permitAll()
-                        // API lecture publique
-                        .requestMatchers(HttpMethod.GET,  "/api/jeux/**", "/api/avis/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html",
+                                "/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml",
+                                "/swagger-resources/**", "/configuration/**").permitAll()
+                        // API publique
+                        .requestMatchers(HttpMethod.GET, "/api/jeux/**", "/api/avis/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
-                        // Reste : JWT requis
+                        // Espace joueur
+                        .requestMatchers("/joueur/**").hasRole("JOUEUR")
+                        // Espace modérateur
+                        .requestMatchers("/moderateur/**").hasRole("MODERATEUR")
+                        // API protégée
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                // Rediriger vers /connexion si non authentifié sur une route UI
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            String uri = request.getRequestURI();
+                            if (!uri.startsWith("/api/")) {
+                                response.sendRedirect(request.getContextPath() + "/connexion");
+                            } else {
+                                response.sendError(401, "Non authentifié");
+                            }
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            String uri = request.getRequestURI();
+                            if (!uri.startsWith("/api/")) {
+                                response.sendRedirect(request.getContextPath() + "/connexion");
+                            } else {
+                                response.sendError(403, "Accès refusé");
+                            }
+                        })
+                );
 
         return http.build();
     }

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Inscription — Avis Jeux Vidéo</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+    <style>
+        body { background: #0f0f1a; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 2rem 0; box-sizing: border-box; }
+        .register-card { background: #1a1a2e; border: 1px solid #2d2d5b; border-radius: 12px; padding: 2.5rem 3rem; width: 100%; max-width: 460px; box-shadow: 0 8px 32px rgba(0,0,0,.4); }
+        .register-card h1 { color: #e94560; text-align: center; margin-bottom: .5rem; font-size: 1.8rem; }
+        .register-card p.subtitle { color: #888; text-align: center; margin-bottom: 2rem; font-size: .9rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; color: #ccc; margin-bottom: .4rem; font-size: .9rem; }
+        .form-group input { width: 100%; padding: .75rem 1rem; background: #0f0f1a; border: 1px solid #2d2d5b; border-radius: 8px; color: #fff; font-size: 1rem; box-sizing: border-box; }
+        .form-group input:focus { outline: none; border-color: #e94560; }
+        .btn-register { width: 100%; padding: .85rem; background: #e94560; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: .5rem; transition: background .2s; }
+        .btn-register:hover { background: #c73652; }
+        .alert-error   { background: rgba(233,69,96,.15); border: 1px solid #e94560; color: #e94560; border-radius: 8px; padding: .75rem 1rem; margin-bottom: 1.2rem; text-align: center; font-size: .9rem; }
+        .alert-success { background: rgba(39,174,96,.15);  border: 1px solid #27ae60; color: #27ae60;  border-radius: 8px; padding: .75rem 1rem; margin-bottom: 1.2rem; text-align: center; font-size: .9rem; }
+        .link-login { color: #888; font-size: .85rem; margin-top: 1.5rem; text-align: center; }
+        .link-login a { color: #e94560; text-decoration: none; }
+        .link-login a:hover { text-decoration: underline; }
+        .field-error { color: #e94560; font-size: .78rem; margin-top: .3rem; }
+    </style>
+</head>
+<body>
+<div class="register-card">
+    <h1>🎮 GameReviews</h1>
+    <p class="subtitle">Créer un compte joueur</p>
+
+    <div th:if="${erreur}"  class="alert-error"   th:text="${erreur}"></div>
+    <div th:if="${succes}"  class="alert-success"  th:text="${succes}"></div>
+
+    <form th:action="@{/inscription}" method="post">
+        <div class="form-group">
+            <label for="pseudo">Pseudo</label>
+            <input type="text" id="pseudo" name="pseudo"
+                   th:value="${param.pseudo}"
+                   placeholder="VotreAlias42" required maxlength="50" autofocus/>
+            <div th:if="${erreurPseudo}" class="field-error" th:text="${erreurPseudo}"></div>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email"
+                   th:value="${param.email}"
+                   placeholder="votre@email.com" required/>
+            <div th:if="${erreurEmail}" class="field-error" th:text="${erreurEmail}"></div>
+        </div>
+        <div class="form-group">
+            <label for="motDePasse">Mot de passe</label>
+            <input type="password" id="motDePasse" name="motDePasse"
+                   placeholder="Minimum 6 caractères" required minlength="6"/>
+        </div>
+        <div class="form-group">
+            <label for="confirmation">Confirmer le mot de passe</label>
+            <input type="password" id="confirmation" name="confirmation"
+                   placeholder="••••••••" required minlength="6"/>
+            <div th:if="${erreurConfirmation}" class="field-error" th:text="${erreurConfirmation}"></div>
+        </div>
+        <div class="form-group">
+            <label for="dateDeNaissance">Date de naissance</label>
+            <input type="date" id="dateDeNaissance" name="dateDeNaissance"
+                   th:value="${param.dateDeNaissance}" required/>
+        </div>
+        <button type="submit" class="btn-register">Créer mon compte</button>
+    </form>
+
+    <p class="link-login">
+        Déjà un compte ? <a th:href="@{/connexion}">Se connecter</a>
+    </p>
+</div>
+</body>
+</html>
+
